@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUMA x TRON Race Arena</title>
+    <link rel="stylesheet" href="webapp.css">
+</head>
+<body>
+    <div class="page-backdrop-image" aria-hidden="true"></div>
+    <div class="grid"></div>
+    <div class="glow glow-left"></div>
+    <div class="glow glow-right"></div>
+
+    <div class="container">
+        <section class="hero">
+            <div class="hero-top">
+                <div class="hero-copy">
+                    <div class="eyebrow">Fixed demo track: 0.5 m</div>
+                    <h1>Race Against<br>The Robots</h1>
+                    <p class="subtitle">
+                        Can you beat a robot and use less energy doing it? Time the human runner, the PUMA bot, and the TRON bot on the same short track.
+                    </p>
+                </div>
+
+                <div class="hero-side">
+                    <div class="brand-mark">
+                        <div class="brand-word">ROBO<span>TUM</span></div>
+                        <div class="brand-tag">Shaping the Future of Robotics</div>
+                    </div>
+
+                    <div class="robot-showcase">
+                        <div class="robot-panel robot-panel-puma">
+                            <div class="robot-label">PUMA</div>
+                            <img src="image.png" alt="PUMA robot" class="robot-art robot-art-puma">
+                        </div>
+
+                        <div class="robot-panel robot-panel-tron">
+                            <div class="robot-label">TRON</div>
+                            <img src="image (2).png" alt="TRON robot" class="robot-art robot-art-tron">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="stack">
+            <section class="step-card step-one" data-step="1">
+                <div class="step-head">
+                    <h2 class="step-title">Choose an Opponent</h2>
+                    <p class="step-copy">
+                        Pick the lane, enter the human details, and add finish times for all three racers so we can compare the sprint and the estimated energy use.
+                    </p>
+                </div>
+
+                <div class="lane-strip">
+                    <div class="lane-chip chip-human">
+                        <div class="icon-wrap icon-human">
+                            <svg viewBox="0 0 32 32" aria-hidden="true">
+                                <circle cx="16" cy="6" r="3"></circle>
+                                <path d="M16 9.5v8"></path>
+                                <path d="M11.5 14.5 16 11l4.5 3.5"></path>
+                                <path d="M16 17.5l-3.5 7"></path>
+                                <path d="M16 17.5l4.5 6.5"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chip-title">Human Runner</div>
+                            <small>Manikin-style athlete lane</small>
+                        </div>
+                    </div>
+
+                    <div class="lane-chip chip-puma">
+                        <div class="icon-wrap icon-puma">
+                            <svg viewBox="0 0 32 32" aria-hidden="true">
+                                <path d="M6 18h14l4-4h2"></path>
+                                <path d="M9 18 8 25"></path>
+                                <path d="M14 18v7"></path>
+                                <path d="M21 18l-1 7"></path>
+                                <path d="M24 14l2 1"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chip-title">PUMA 4-Leg Bot</div>
+                            <small>Quadruped racing platform</small>
+                        </div>
+                    </div>
+
+                    <div class="lane-chip chip-tron">
+                        <div class="icon-wrap icon-tron">
+                            <svg viewBox="0 0 32 32" aria-hidden="true">
+                                <path d="M12 9h8"></path>
+                                <path d="M16 9v8"></path>
+                                <path d="M16 17 11 25"></path>
+                                <path d="M16 17 21 25"></path>
+                                <path d="M11 25h-2"></path>
+                                <path d="M21 25h2"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chip-title">TRON 2-Leg Bot</div>
+                            <small>Biped lower-body racer</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-panel">
+                    <div class="field">
+                        <label for="name">Runner Name</label>
+                        <input type="text" id="name" placeholder="Enter human competitor name">
+                    </div>
+                    <div class="field">
+                        <label for="weight">Human Weight</label>
+                        <input type="number" id="weight" placeholder="kg">
+                    </div>
+                    <div class="field">
+                        <label for="human-time">Human Finish</label>
+                        <input type="number" id="human-time" placeholder="seconds" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label for="puma-time">PUMA Finish</label>
+                        <input type="number" id="puma-time" placeholder="seconds" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label for="tron-time">TRON Finish</label>
+                        <input type="number" id="tron-time" placeholder="seconds" step="0.01">
+                    </div>
+                    <button type="button" id="run-race-button">Run the Race</button>
+                </div>
+            </section>
+
+            <section class="step-card step-two summary" id="summary" data-step="2">
+                <div class="step-head">
+                    <h2 class="step-title">Run the Race</h2>
+                    <p class="step-copy">
+                        The winner summary updates as soon as all three finish times are entered, showing who crossed first and how close the chase was.
+                    </p>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="winner-badge">Race Winner</div>
+                        <div class="winner-name" id="winner-name">-</div>
+                        <div class="winner-time" id="winner-time">-</div>
+                        <div class="summary-note" id="winner-note">-</div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-label">Fastest Speed</div>
+                        <span class="metric-value" id="fastest-speed">0 m/s</span>
+                        <div class="result-note">Estimated over the fixed 0.5 m demo track.</div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-label">Closest Rival Gap</div>
+                        <span class="metric-value" id="winner-gap">0.00 s</span>
+                        <div class="result-note">Difference between first and second place.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="step-card step-three" data-step="3">
+                <div class="step-head">
+                    <h2 class="step-title">Energy Showdown</h2>
+                    <p class="step-copy">
+                        See the full breakdown: finish times, estimated speed, and energy use for the human, the PUMA bot, and the TRON bot in one poster-style comparison.
+                    </p>
+                </div>
+
+                <div class="results-wrap">
+                    <section class="cards" id="results">
+                        <article class="card card-human">
+                            <div class="card-header">
+                                <div class="icon-wrap icon-human">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                                        <circle cx="16" cy="6" r="3"></circle>
+                                        <path d="M16 9.5v8"></path>
+                                        <path d="M11.5 14.5 16 11l4.5 3.5"></path>
+                                        <path d="M16 17.5l-3.5 7"></path>
+                                        <path d="M16 17.5l4.5 6.5"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="card-title">Human Runner</h2>
+                                    <div class="card-subtitle" id="human-name-label">Athlete</div>
+                                </div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Finish Time</div>
+                                <span class="big-time big-human" id="human-time-out">0.00 s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Estimated Speed</div>
+                                <span class="big-time" id="human-speed">0.00 m/s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Energy Used</div>
+                                <span class="big-time" id="human-joules">0 J</span>
+                                <div class="result-note" id="human-kcal">0.00 kcal</div>
+                                <div class="result-note" id="human-food">Consumed energy worth of 0 bananas.</div>
+                            </div>
+                        </article>
+
+                        <article class="card card-puma">
+                            <div class="card-header">
+                                <div class="icon-wrap icon-puma">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                                        <path d="M6 18h14l4-4h2"></path>
+                                        <path d="M9 18 8 25"></path>
+                                        <path d="M14 18v7"></path>
+                                        <path d="M21 18l-1 7"></path>
+                                        <path d="M24 14l2 1"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="card-title">PUMA 4-Leg Bot</h2>
+                                    <div class="card-subtitle">Quadruped robot lane</div>
+                                </div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Finish Time</div>
+                                <span class="big-time big-puma" id="puma-time-out">0.00 s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Estimated Speed</div>
+                                <span class="big-time" id="puma-speed">0.00 m/s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Energy Used</div>
+                                <span class="big-time" id="puma-joules">0 J</span>
+                                <div class="result-note" id="puma-kcal">0.00 kcal</div>
+                                <div class="result-note" id="puma-food">Equivalent to the energy in 0 bananas.</div>
+                            </div>
+                        </article>
+
+                        <article class="card card-tron">
+                            <div class="card-header">
+                                <div class="icon-wrap icon-tron">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                                        <path d="M12 9h8"></path>
+                                        <path d="M16 9v8"></path>
+                                        <path d="M16 17 11 25"></path>
+                                        <path d="M16 17 21 25"></path>
+                                        <path d="M11 25h-2"></path>
+                                        <path d="M21 25h2"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="card-title">TRON 2-Leg Bot</h2>
+                                    <div class="card-subtitle">Biped robot lane</div>
+                                </div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Finish Time</div>
+                                <span class="big-time big-tron" id="tron-time-out">0.00 s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Estimated Speed</div>
+                                <span class="big-time" id="tron-speed">0.00 m/s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Energy Used</div>
+                                <span class="big-time" id="tron-joules">0 J</span>
+                                <div class="result-note" id="tron-kcal">0.00 kcal</div>
+                                <div class="result-note" id="tron-food">Equivalent to the energy in 0 bananas.</div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section>
+                        <h3 class="history-title">Race History</h3>
+                        <ul class="history-list" id="history-list"></ul>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="webapp.js" defer></script>
+</body>
+</html>
