@@ -300,19 +300,20 @@ h1 {
 
 .lane-strip {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
 }
 
 .lane-chip {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
     padding: 18px 18px;
     border-radius: 18px;
     text-align: left;
     border: 1px solid rgba(255, 255, 255, 0.06);
+    min-height: 104px;
 }
 
 .chip-human {
@@ -325,6 +326,14 @@ h1 {
 
 .chip-tron {
     background: linear-gradient(180deg, #13456f, #11578c);
+}
+
+.chip-forrest {
+    background: linear-gradient(180deg, #566871, #3f4f56);
+}
+
+.chip-warr {
+    background: linear-gradient(180deg, #8c5f2d, #b17d35);
 }
 
 .icon-wrap {
@@ -353,7 +362,8 @@ h1 {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin-bottom: 4px;
-    font-size: 1rem;
+    font-size: 0.92rem;
+    line-height: 1.2;
 }
 
 .lane-chip small,
@@ -367,13 +377,18 @@ h1 {
 
 .setup-panel {
     display: grid;
-    grid-template-columns: 1.15fr 0.8fr 0.8fr 0.8fr 0.8fr;
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 16px;
     padding: 0;
+    align-items: end;
 }
 
 .field {
     text-align: left;
+}
+
+.field:first-child {
+    grid-column: span 2;
 }
 
 .field label {
@@ -398,6 +413,7 @@ button {
 
 input {
     background: rgba(7, 19, 35, 0.78);
+    min-height: 54px;
 }
 
 input::placeholder {
@@ -421,6 +437,13 @@ button {
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
+#run-race-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+    width: min(260px, 100%);
+    margin-top: 4px;
+}
+
 button:hover {
     transform: translateY(-1px);
     filter: brightness(1.05);
@@ -432,8 +455,102 @@ button:hover {
 
 .summary-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    grid-template-columns: minmax(280px, 1.4fr) repeat(2, minmax(180px, 0.8fr));
     gap: 16px;
+}
+
+.leaderboard-panel {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 24, 44, 0.24);
+}
+
+.leaderboard-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.leaderboard-title {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.leaderboard-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.leaderboard-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1.2fr) auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-rank {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.leaderboard-list li:nth-child(1) .leaderboard-rank {
+    background: linear-gradient(180deg, #f2bd59, #c88a2f);
+}
+
+.leaderboard-list li:nth-child(2) .leaderboard-rank {
+    background: linear-gradient(180deg, #bfc8d3, #8390a1);
+}
+
+.leaderboard-list li:nth-child(3) .leaderboard-rank {
+    background: linear-gradient(180deg, #c98f63, #8f5d36);
+}
+
+.leaderboard-name {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.leaderboard-label {
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.leaderboard-role {
+    color: var(--text-soft);
+    font-size: 0.92rem;
+}
+
+.leaderboard-time,
+.leaderboard-speed {
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.leaderboard-empty {
+    justify-content: center;
+    color: var(--text-soft);
 }
 
 .summary-card,
@@ -490,12 +607,12 @@ button:hover {
 
 .results-wrap {
     display: grid;
-    gap: 18px;
+    gap: 22px;
 }
 
 .cards {
     display: none;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 18px;
 }
 
@@ -504,6 +621,7 @@ button:hover {
     overflow: hidden;
     padding: 20px;
     box-shadow: none;
+    min-height: 100%;
 }
 
 .card-human {
@@ -518,18 +636,27 @@ button:hover {
     background: linear-gradient(180deg, #123c67, #12588d);
 }
 
+.card-forrest {
+    background: linear-gradient(180deg, #445761, #5f727b);
+}
+
+.card-warr {
+    background: linear-gradient(180deg, #8b5f2c, #b88034);
+}
+
 .card-header {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 18px;
 }
 
 .card-title {
     margin: 0;
-    font-size: 1.08rem;
+    font-size: 0.98rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    line-height: 1.3;
 }
 
 .stat-block {
@@ -544,21 +671,26 @@ button:hover {
 
 .big-time {
     display: block;
-    font-size: clamp(1.9rem, 3.8vw, 2.7rem);
+    font-size: clamp(1.55rem, 3vw, 2.2rem);
     font-weight: 900;
     margin-top: 6px;
     color: #ffffff;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
 }
 
 .big-human,
 .big-puma,
-.big-tron {
+.big-tron,
+.big-forrest,
+.big-warr {
     text-shadow: none;
 }
 
 .result-note {
     margin-top: 8px;
     line-height: 1.5;
+    font-size: 0.93rem;
 }
 
 .history-title {
@@ -579,7 +711,7 @@ button:hover {
 .history-list li {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
     padding: 16px 18px;
 }
@@ -608,8 +740,6 @@ button:hover {
     }
 
     .hero-top,
-    .lane-strip,
-    .cards,
     .summary-grid,
     .setup-panel {
         grid-template-columns: 1fr;
@@ -631,6 +761,24 @@ button:hover {
     .brand-mark {
         text-align: left;
         margin-top: 16px;
+    }
+
+    .leaderboard-head,
+    .leaderboard-list li {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .leaderboard-head {
+        align-items: flex-start;
+    }
+
+    .leaderboard-list li {
+        gap: 10px;
+    }
+
+    .field:first-child {
+        grid-column: auto;
     }
 
     .robot-showcase {

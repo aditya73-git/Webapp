@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUMA x TRON Race Arena</title>
+    <title>Robot Race Arena</title>
     <link rel="stylesheet" href="webapp.css">
 </head>
 <body>
@@ -16,10 +16,10 @@
         <section class="hero">
             <div class="hero-top">
                 <div class="hero-copy">
-                    <div class="eyebrow">Fixed demo track: 0.5 m</div>
+                    <div class="eyebrow">Race distance: <span id="track-distance-badge">-</span></div>
                     <h1>Race Against<br>The Robots</h1>
                     <p class="subtitle">
-                        Can you beat a robot and use less energy doing it? Time the human runner, the PUMA bot, and the TRON bot on the same short track.
+                        Can you beat the full robot field and use less energy doing it? Time the human runner, PUMA, TRON, FORREST, and the WARR Crater Rover over a full <span id="track-distance-sentence">-</span> race.
                     </p>
                 </div>
 
@@ -49,7 +49,7 @@
                 <div class="step-head">
                     <h2 class="step-title">Choose an Opponent</h2>
                     <p class="step-copy">
-                        Pick the lane, enter the human details, and add finish times for all three racers so we can compare the sprint and the estimated energy use.
+                        Enter the human details, then either type robot finish times manually or leave them blank to auto-calculate from the default robot speeds.
                     </p>
                 </div>
 
@@ -66,7 +66,7 @@
                         </div>
                         <div>
                             <div class="chip-title">Human Runner</div>
-                            <small>Manikin-style athlete lane</small>
+                            <small>Athlete lane</small>
                         </div>
                     </div>
 
@@ -81,8 +81,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="chip-title">PUMA 4-Leg Bot</div>
-                            <small>Quadruped racing platform</small>
+                            <div class="chip-title">PUMA </div>
+                            <small>Quadruped robot lane</small>
                         </div>
                     </div>
 
@@ -98,8 +98,42 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="chip-title">TRON 2-Leg Bot</div>
-                            <small>Biped lower-body racer</small>
+                            <div class="chip-title">TRON</div>
+                            <small>Biped robot lane</small>
+                        </div>
+                    </div>
+
+                    <div class="lane-chip chip-forrest">
+                        <div class="icon-wrap icon-forrest">
+                            <svg viewBox="0 0 32 32" aria-hidden="true">
+                                <path d="M10 7h12"></path>
+                                <path d="M12 11h8"></path>
+                                <path d="M16 7v10"></path>
+                                <path d="M12 17l-3 8"></path>
+                                <path d="M20 17l3 8"></path>
+                                <path d="M13 25h-3"></path>
+                                <path d="M22 25h-3"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chip-title">FORREST</div>
+                            <small>Lightweight walking platform</small>
+                        </div>
+                    </div>
+
+                    <div class="lane-chip chip-warr">
+                        <div class="icon-wrap icon-warr">
+                            <svg viewBox="0 0 32 32" aria-hidden="true">
+                                <circle cx="10" cy="23" r="2.5"></circle>
+                                <circle cx="22" cy="23" r="2.5"></circle>
+                                <path d="M7 23h18"></path>
+                                <path d="M10 20l3-8h8l3 8"></path>
+                                <path d="M14 9h4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chip-title">WARR Crater Rover</div>
+                            <small>Rugged rover lane</small>
                         </div>
                     </div>
                 </div>
@@ -119,11 +153,19 @@
                     </div>
                     <div class="field">
                         <label for="puma-time">PUMA Finish</label>
-                        <input type="number" id="puma-time" placeholder="seconds" step="0.01">
+                        <input type="number" id="puma-time" placeholder="optional auto time" step="0.01">
                     </div>
                     <div class="field">
                         <label for="tron-time">TRON Finish</label>
-                        <input type="number" id="tron-time" placeholder="seconds" step="0.01">
+                        <input type="number" id="tron-time" placeholder="optional auto time" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label for="forrest-time">FORREST Finish</label>
+                        <input type="number" id="forrest-time" placeholder="optional auto time" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label for="warr-time">WARR Finish</label>
+                        <input type="number" id="warr-time" placeholder="optional auto time" step="0.01">
                     </div>
                     <button type="button" id="run-race-button">Run the Race</button>
                 </div>
@@ -133,7 +175,7 @@
                 <div class="step-head">
                     <h2 class="step-title">Run the Race</h2>
                     <p class="step-copy">
-                        The winner summary updates as soon as all three finish times are entered, showing who crossed first and how close the chase was.
+                        The winner summary updates as soon as the human time is entered, using your robot times when provided and default speed-based times when left blank.
                     </p>
                 </div>
                 <div class="summary-grid">
@@ -146,7 +188,7 @@
                     <div class="mini-card">
                         <div class="mini-label">Fastest Speed</div>
                         <span class="metric-value" id="fastest-speed">0 m/s</span>
-                        <div class="result-note">Estimated over the fixed 0.5 m demo track.</div>
+                        <div class="result-note">Estimated over the full <span id="track-distance-note">-</span> race distance.</div>
                     </div>
                     <div class="mini-card">
                         <div class="mini-label">Closest Rival Gap</div>
@@ -154,19 +196,29 @@
                         <div class="result-note">Difference between first and second place.</div>
                     </div>
                 </div>
+
+                <section class="leaderboard-panel">
+                    <div class="leaderboard-head">
+                        <h3 class="leaderboard-title">Finish Leaderboard</h3>
+                        <div class="result-note">Ordered by fastest finish time.</div>
+                    </div>
+                    <ol class="leaderboard-list" id="leaderboard-list">
+                        <li class="leaderboard-empty">Run a race to generate the leaderboard.</li>
+                    </ol>
+                </section>
             </section>
 
             <section class="step-card step-three" data-step="3">
                 <div class="step-head">
                     <h2 class="step-title">Energy Showdown</h2>
                     <p class="step-copy">
-                        See the full breakdown: finish times, estimated speed, and energy use for the human, the PUMA bot, and the TRON bot in one poster-style comparison.
+                        See the full breakdown: finish times, estimated speed, and energy use for the human and every robot in one poster-style comparison, sorted from least to most energy consumed.
                     </p>
                 </div>
 
                 <div class="results-wrap">
                     <section class="cards" id="results">
-                        <article class="card card-human">
+                        <article class="card card-human" data-competitor="human">
                             <div class="card-header">
                                 <div class="icon-wrap icon-human">
                                     <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -198,7 +250,7 @@
                             </div>
                         </article>
 
-                        <article class="card card-puma">
+                        <article class="card card-puma" data-competitor="puma">
                             <div class="card-header">
                                 <div class="icon-wrap icon-puma">
                                     <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -210,7 +262,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="card-title">PUMA 4-Leg Bot</h2>
+                                    <h2 class="card-title">PUMA</h2>
                                     <div class="card-subtitle">Quadruped robot lane</div>
                                 </div>
                             </div>
@@ -230,7 +282,7 @@
                             </div>
                         </article>
 
-                        <article class="card card-tron">
+                        <article class="card card-tron" data-competitor="tron">
                             <div class="card-header">
                                 <div class="icon-wrap icon-tron">
                                     <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -243,7 +295,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="card-title">TRON 2-Leg Bot</h2>
+                                    <h2 class="card-title">TRON</h2>
                                     <div class="card-subtitle">Biped robot lane</div>
                                 </div>
                             </div>
@@ -260,6 +312,72 @@
                                 <span class="big-time" id="tron-joules">0 J</span>
                                 <div class="result-note" id="tron-kcal">0.00 kcal</div>
                                 <div class="result-note" id="tron-food">Equivalent to the energy in 0 bananas.</div>
+                            </div>
+                        </article>
+
+                        <article class="card card-forrest" data-competitor="forrest">
+                            <div class="card-header">
+                                <div class="icon-wrap icon-forrest">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                                        <path d="M10 7h12"></path>
+                                        <path d="M12 11h8"></path>
+                                        <path d="M16 7v10"></path>
+                                        <path d="M12 17l-3 8"></path>
+                                        <path d="M20 17l3 8"></path>
+                                        <path d="M13 25h-3"></path>
+                                        <path d="M22 25h-3"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="card-title">FORREST</h2>
+                                    <div class="card-subtitle">Lightweight walking lane</div>
+                                </div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Finish Time</div>
+                                <span class="big-time big-forrest" id="forrest-time-out">0.00 s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Estimated Speed</div>
+                                <span class="big-time" id="forrest-speed">0.00 m/s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Energy Used</div>
+                                <span class="big-time" id="forrest-joules">0 J</span>
+                                <div class="result-note" id="forrest-kcal">0.00 kcal</div>
+                                <div class="result-note" id="forrest-food">Equivalent to the energy in 0 bananas.</div>
+                            </div>
+                        </article>
+
+                        <article class="card card-warr" data-competitor="warr">
+                            <div class="card-header">
+                                <div class="icon-wrap icon-warr">
+                                    <svg viewBox="0 0 32 32" aria-hidden="true">
+                                        <circle cx="10" cy="23" r="2.5"></circle>
+                                        <circle cx="22" cy="23" r="2.5"></circle>
+                                        <path d="M7 23h18"></path>
+                                        <path d="M10 20l3-8h8l3 8"></path>
+                                        <path d="M14 9h4"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="card-title">WARR Crater Rover</h2>
+                                    <div class="card-subtitle">Rover challenge lane</div>
+                                </div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Finish Time</div>
+                                <span class="big-time big-warr" id="warr-time-out">0.00 s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Estimated Speed</div>
+                                <span class="big-time" id="warr-speed">0.00 m/s</span>
+                            </div>
+                            <div class="stat-block">
+                                <div class="metric-label">Energy Used</div>
+                                <span class="big-time" id="warr-joules">0 J</span>
+                                <div class="result-note" id="warr-kcal">0.00 kcal</div>
+                                <div class="result-note" id="warr-food">Equivalent to the energy in 0 bananas.</div>
                             </div>
                         </article>
                     </section>
