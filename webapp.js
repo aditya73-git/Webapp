@@ -1,8 +1,9 @@
-const TRACK_DISTANCE_M = 50;
+const DEFAULT_TRACK_DISTANCE_M = 5;
 const BANANA_KCAL = 105;
+const GUMMY_BEAR_KCAL = 7;
 const PUMA_POWER_W = 360;
 const TRON_POWER_W = 450;
-const FORREST_POWER_W = 120;
+const FORREST_POWER_W = 700;
 const WARR_CRATER_ROVER_POWER_W = 800;
 const PUMA_LABEL = "PUMA";
 const TRON_LABEL = "TRON";
@@ -12,20 +13,28 @@ const PUMA_MAX_SPEED_MPS = 18 / 3.6;
 const TRON_MAX_SPEED_MPS = 3.5 / 3.6;
 const FORREST_MAX_SPEED_MPS = 37 / 3.6;
 const WARR_MAX_SPEED_MPS = 0.3;
-const PUMA_RUNTIME_SPEED_FACTOR = 1;
-const TRON_RUNTIME_SPEED_FACTOR = 1;
-const FORREST_RUNTIME_SPEED_FACTOR = 1;
-const WARR_RUNTIME_SPEED_FACTOR = 1;
-const PUMA_RUNTIME_POWER_FACTOR = 0.55;
-const TRON_RUNTIME_POWER_FACTOR = 0.65;
-const FORREST_RUNTIME_POWER_FACTOR = 0.5;
-const WARR_RUNTIME_POWER_FACTOR = 0.45;
+const PUMA_SPEED_RISE_TAU_S = 0.45;
+const TRON_SPEED_RISE_TAU_S = 0.9;
+const FORREST_SPEED_RISE_TAU_S = 0.3;
+const WARR_SPEED_RISE_TAU_S = 0.5;
+const ROBOT_CRUISE_POWER_FRACTION = 0.90;
+const ROBOT_STARTUP_DECAY_TAU_S = 0.6;
 const raceHistory = [];
 
 function formatBananas(kcalValue) {
     const bananas = kcalValue / BANANA_KCAL;
     const rounded = bananas < 1 ? bananas.toFixed(2) : bananas.toFixed(1);
     return `${rounded} ${parseFloat(rounded) === 1 ? "banana" : "bananas"}`;
+}
+
+function formatGummyBears(kcalValue) {
+    const gummyBears = kcalValue / GUMMY_BEAR_KCAL;
+    const rounded = gummyBears < 1 ? gummyBears.toFixed(2) : gummyBears.toFixed(1);
+    return `${rounded} ${parseFloat(rounded) === 1 ? "gummy bear" : "gummy bears"}`;
+}
+
+function formatFoodComparison(kcalValue) {
+    return `${formatBananas(kcalValue)} or ${formatGummyBears(kcalValue)}`;
 }
 
 function estimateMetFromSpeed(speedMps) {
@@ -55,23 +64,34 @@ function formatEnergyJoules(value) {
     return `${Math.round(value)} J`;
 }
 
-function formatTrackDistanceCompact() {
-    return Number.isInteger(TRACK_DISTANCE_M) ? `${TRACK_DISTANCE_M} m` : `${TRACK_DISTANCE_M.toFixed(1)} m`;
+function getTrackDistance() {
+    const input = document.getElementById("track-distance-input");
+
+    if (!input) {
+        return DEFAULT_TRACK_DISTANCE_M;
+    }
+
+    const parsedValue = parseFloat(input.value);
+    return parsedValue > 0 ? parsedValue : DEFAULT_TRACK_DISTANCE_M;
 }
 
-function formatTrackDistanceSentence() {
-    const formattedValue = Number.isInteger(TRACK_DISTANCE_M) ? TRACK_DISTANCE_M : TRACK_DISTANCE_M.toFixed(1);
-    const unitLabel = Number(TRACK_DISTANCE_M) === 1 ? "meter" : "meters";
+function formatTrackDistanceValue(distanceMeters) {
+    return Number.isInteger(distanceMeters) ? distanceMeters.toString() : distanceMeters.toFixed(1);
+}
+
+function formatTrackDistanceCompact(distanceMeters = getTrackDistance()) {
+    return `${formatTrackDistanceValue(distanceMeters)} m`;
+}
+
+function formatTrackDistanceSentence(distanceMeters = getTrackDistance()) {
+    const formattedValue = formatTrackDistanceValue(distanceMeters);
+    const unitLabel = Number(distanceMeters) === 1 ? "meter" : "meters";
 
     return `${formattedValue} ${unitLabel}`;
 }
 
-function formatTrackDistanceTrackLabel() {
-    if (Number.isInteger(TRACK_DISTANCE_M)) {
-        return `${TRACK_DISTANCE_M} m`;
-    }
-
-    return `${TRACK_DISTANCE_M.toFixed(1)} m`;
+function formatTrackDistanceTrackLabel(distanceMeters = getTrackDistance()) {
+    return formatTrackDistanceCompact(distanceMeters);
 }
 
 function setText(id, value) {
@@ -79,33 +99,98 @@ function setText(id, value) {
 }
 
 function syncTrackDistanceText() {
-    setText("track-distance-badge", formatTrackDistanceCompact());
-    setText("track-distance-sentence", formatTrackDistanceSentence());
-    setText("track-distance-note", formatTrackDistanceCompact());
+    const trackDistance = getTrackDistance();
+
+    setText("track-distance-sentence", formatTrackDistanceSentence(trackDistance));
+    setText("track-distance-note", formatTrackDistanceCompact(trackDistance));
 }
 
-function getDefaultRobotTime(speedMps, speedFactor) {
-    return TRACK_DISTANCE_M / (speedMps * speedFactor);
+function calculateExponentialRiseDistance(settlingSpeedMps, riseTauSeconds, runtimeSeconds) {
+    return settlingSpeedMps * (runtimeSeconds - riseTauSeconds * (1 - Math.exp(-runtimeSeconds / riseTauSeconds)));
 }
 
-function resolveRobotTime(inputId, defaultSpeedMps, speedFactor) {
+function getDefaultRobotTime(trackDistance, settlingSpeedMps, riseTauSeconds) {
+    if (trackDistance <= 0 || settlingSpeedMps <= 0) {
+        return 0;
+    }
+
+    if (riseTauSeconds <= 0) {
+        return trackDistance / settlingSpeedMps;
+    }
+
+    let low = 0;
+    let high = Math.max(trackDistance / settlingSpeedMps, riseTauSeconds);
+
+    while (calculateExponentialRiseDistance(settlingSpeedMps, riseTauSeconds, high) < trackDistance) {
+        high *= 2;
+    }
+
+    for (let iteration = 0; iteration < 40; iteration += 1) {
+        const mid = (low + high) / 2;
+
+        if (calculateExponentialRiseDistance(settlingSpeedMps, riseTauSeconds, mid) < trackDistance) {
+            low = mid;
+        } else {
+            high = mid;
+        }
+    }
+
+    return high;
+}
+
+function calculateExponentialDecayEnergy(peakPowerWatts, runtimeSeconds, cruisePowerFraction = ROBOT_CRUISE_POWER_FRACTION, tauSeconds = ROBOT_STARTUP_DECAY_TAU_S) {
+    const cruisePowerWatts = peakPowerWatts * cruisePowerFraction;
+    const transientEnergyJoules = (peakPowerWatts - cruisePowerWatts) * tauSeconds * (1 - Math.exp(-runtimeSeconds / tauSeconds));
+    return (cruisePowerWatts * runtimeSeconds) + transientEnergyJoules;
+}
+
+function resolveRobotTime(inputId, settlingSpeedMps, riseTauSeconds) {
     const input = document.getElementById(inputId);
     const rawValue = input.value.trim();
+    const trackDistance = getTrackDistance();
 
     if (!rawValue) {
-        const calculatedTime = getDefaultRobotTime(defaultSpeedMps, speedFactor);
+        const calculatedTime = getDefaultRobotTime(trackDistance, settlingSpeedMps, riseTauSeconds);
         input.value = calculatedTime.toFixed(2);
+        input.dataset.autoFilled = "true";
         return calculatedTime;
     }
 
     return parseFloat(rawValue);
 }
 
+function updateRobotTimeIfAutofilled(inputId, settlingSpeedMps, riseTauSeconds) {
+    const input = document.getElementById(inputId);
+    const isAutoFilled = input.dataset.autoFilled !== "false";
+
+    if (!input.value.trim() || isAutoFilled) {
+        const calculatedTime = getDefaultRobotTime(getTrackDistance(), settlingSpeedMps, riseTauSeconds);
+        input.value = calculatedTime.toFixed(2);
+        input.dataset.autoFilled = "true";
+    }
+}
+
 function prefillDefaultRobotTimes() {
-    resolveRobotTime("puma-time", PUMA_MAX_SPEED_MPS, PUMA_RUNTIME_SPEED_FACTOR);
-    resolveRobotTime("tron-time", TRON_MAX_SPEED_MPS, TRON_RUNTIME_SPEED_FACTOR);
-    resolveRobotTime("forrest-time", FORREST_MAX_SPEED_MPS, FORREST_RUNTIME_SPEED_FACTOR);
-    resolveRobotTime("warr-time", WARR_MAX_SPEED_MPS, WARR_RUNTIME_SPEED_FACTOR);
+    updateRobotTimeIfAutofilled("puma-time", PUMA_MAX_SPEED_MPS, PUMA_SPEED_RISE_TAU_S);
+    updateRobotTimeIfAutofilled("tron-time", TRON_MAX_SPEED_MPS, TRON_SPEED_RISE_TAU_S);
+    updateRobotTimeIfAutofilled("forrest-time", FORREST_MAX_SPEED_MPS, FORREST_SPEED_RISE_TAU_S);
+    updateRobotTimeIfAutofilled("warr-time", WARR_MAX_SPEED_MPS, WARR_SPEED_RISE_TAU_S);
+}
+
+function updateTrackDistance() {
+    syncTrackDistanceText();
+    prefillDefaultRobotTimes();
+}
+
+function normalizeTrackDistanceInput() {
+    const input = document.getElementById("track-distance-input");
+    const parsedValue = parseFloat(input.value);
+
+    if (Number.isNaN(parsedValue) || parsedValue <= 0) {
+        input.value = formatTrackDistanceValue(DEFAULT_TRACK_DISTANCE_M);
+    }
+
+    updateTrackDistance();
 }
 
 function updateLeaderboard(competitorsByTime) {
@@ -140,17 +225,19 @@ function calculateRace() {
     const name = document.getElementById("name").value.trim();
     const weight = parseFloat(document.getElementById("weight").value);
     const humanTime = parseFloat(document.getElementById("human-time").value);
-    const pumaTime = resolveRobotTime("puma-time", PUMA_MAX_SPEED_MPS, PUMA_RUNTIME_SPEED_FACTOR);
-    const tronTime = resolveRobotTime("tron-time", TRON_MAX_SPEED_MPS, TRON_RUNTIME_SPEED_FACTOR);
-    const forrestTime = resolveRobotTime("forrest-time", FORREST_MAX_SPEED_MPS, FORREST_RUNTIME_SPEED_FACTOR);
-    const warrTime = resolveRobotTime("warr-time", WARR_MAX_SPEED_MPS, WARR_RUNTIME_SPEED_FACTOR);
+    const trackDistance = getTrackDistance();
+    const pumaTime = resolveRobotTime("puma-time", PUMA_MAX_SPEED_MPS, PUMA_SPEED_RISE_TAU_S);
+    const tronTime = resolveRobotTime("tron-time", TRON_MAX_SPEED_MPS, TRON_SPEED_RISE_TAU_S);
+    const forrestTime = resolveRobotTime("forrest-time", FORREST_MAX_SPEED_MPS, FORREST_SPEED_RISE_TAU_S);
+    const warrTime = resolveRobotTime("warr-time", WARR_MAX_SPEED_MPS, WARR_SPEED_RISE_TAU_S);
 
-    if (!name || !weight || !humanTime) {
-        alert("Fill in the runner name, weight, and human finish time.");
+    if (!name || !weight || !humanTime || !trackDistance) {
+        alert("Fill in the race distance, runner name, weight, and human finish time.");
         return;
     }
 
     if (
+        trackDistance <= 0 ||
         weight <= 0 ||
         humanTime <= 0 ||
         pumaTime <= 0 ||
@@ -166,26 +253,26 @@ function calculateRace() {
         return;
     }
 
-    const humanSpeed = TRACK_DISTANCE_M / humanTime;
-    const pumaSpeed = TRACK_DISTANCE_M / pumaTime;
-    const tronSpeed = TRACK_DISTANCE_M / tronTime;
-    const forrestSpeed = TRACK_DISTANCE_M / forrestTime;
-    const warrSpeed = TRACK_DISTANCE_M / warrTime;
+    const humanSpeed = trackDistance / humanTime;
+    const pumaSpeed = trackDistance / pumaTime;
+    const tronSpeed = trackDistance / tronTime;
+    const forrestSpeed = trackDistance / forrestTime;
+    const warrSpeed = trackDistance / warrTime;
 
     const humanMet = estimateMetFromSpeed(humanSpeed);
     const humanKcal = (humanMet * 3.5 * weight / 200) * (humanTime / 60);
     const humanJoules = humanKcal * 4184;
 
-    const pumaJoules = (PUMA_POWER_W * PUMA_RUNTIME_POWER_FACTOR) * pumaTime;
+    const pumaJoules = calculateExponentialDecayEnergy(PUMA_POWER_W, pumaTime);
     const pumaKcal = pumaJoules / 4184;
 
-    const tronJoules = (TRON_POWER_W * TRON_RUNTIME_POWER_FACTOR) * tronTime;
+    const tronJoules = calculateExponentialDecayEnergy(TRON_POWER_W, tronTime);
     const tronKcal = tronJoules / 4184;
 
-    const forrestJoules = (FORREST_POWER_W * FORREST_RUNTIME_POWER_FACTOR) * forrestTime;
+    const forrestJoules = calculateExponentialDecayEnergy(FORREST_POWER_W, forrestTime);
     const forrestKcal = forrestJoules / 4184;
 
-    const warrJoules = (WARR_CRATER_ROVER_POWER_W * WARR_RUNTIME_POWER_FACTOR) * warrTime;
+    const warrJoules = calculateExponentialDecayEnergy(WARR_CRATER_ROVER_POWER_W, warrTime);
     const warrKcal = warrJoules / 4184;
 
     const competitors = [
@@ -208,35 +295,35 @@ function calculateRace() {
     setText("human-speed", formatSpeed(humanSpeed));
     setText("human-joules", formatEnergyJoules(humanJoules));
     setText("human-kcal", `${humanKcal.toFixed(2)} kcal`);
-    setText("human-food", `Consumed energy worth of ${formatBananas(humanKcal)}.`);
+    setText("human-food", `Consumed energy worth of ${formatFoodComparison(humanKcal)}.`);
 
     setText("puma-time-out", formatSeconds(pumaTime));
     setText("puma-speed", formatSpeed(pumaSpeed));
     setText("puma-joules", formatEnergyJoules(pumaJoules));
     setText("puma-kcal", `${pumaKcal.toFixed(2)} kcal`);
-    setText("puma-food", `Equivalent to the energy in ${formatBananas(pumaKcal)}.`);
+    setText("puma-food", `Equivalent to the energy in ${formatFoodComparison(pumaKcal)}.`);
 
     setText("tron-time-out", formatSeconds(tronTime));
     setText("tron-speed", formatSpeed(tronSpeed));
     setText("tron-joules", formatEnergyJoules(tronJoules));
     setText("tron-kcal", `${tronKcal.toFixed(2)} kcal`);
-    setText("tron-food", `Equivalent to the energy in ${formatBananas(tronKcal)}.`);
+    setText("tron-food", `Equivalent to the energy in ${formatFoodComparison(tronKcal)}.`);
 
     setText("forrest-time-out", formatSeconds(forrestTime));
     setText("forrest-speed", formatSpeed(forrestSpeed));
     setText("forrest-joules", formatEnergyJoules(forrestJoules));
     setText("forrest-kcal", `${forrestKcal.toFixed(2)} kcal`);
-    setText("forrest-food", `Equivalent to the energy in ${formatBananas(forrestKcal)}.`);
+    setText("forrest-food", `Equivalent to the energy in ${formatFoodComparison(forrestKcal)}.`);
 
     setText("warr-time-out", formatSeconds(warrTime));
     setText("warr-speed", formatSpeed(warrSpeed));
     setText("warr-joules", formatEnergyJoules(warrJoules));
     setText("warr-kcal", `${warrKcal.toFixed(2)} kcal`);
-    setText("warr-food", `Equivalent to the energy in ${formatBananas(warrKcal)}.`);
+    setText("warr-food", `Equivalent to the energy in ${formatFoodComparison(warrKcal)}.`);
 
     setText("winner-name", winner.label);
     setText("winner-time", `${winner.role} finished first in ${formatSeconds(winner.time)}.`);
-    setText("winner-note", `${winner.label} led the field by ${gap.toFixed(2)} s over ${second.label} on the ${formatTrackDistanceTrackLabel()} track.`);
+    setText("winner-note", `${winner.label} led the field by ${gap.toFixed(2)} s over ${second.label} on the ${formatTrackDistanceTrackLabel(trackDistance)} track.`);
     setText("fastest-speed", formatSpeed(winner.speed));
     setText("winner-gap", formatSeconds(gap));
 
@@ -284,8 +371,20 @@ function updateHistory() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const trackDistanceInput = document.getElementById("track-distance-input");
+
+    trackDistanceInput.value = formatTrackDistanceValue(DEFAULT_TRACK_DISTANCE_M);
     syncTrackDistanceText();
     prefillDefaultRobotTimes();
+    trackDistanceInput.addEventListener("input", updateTrackDistance);
+    trackDistanceInput.addEventListener("change", normalizeTrackDistanceInput);
+    trackDistanceInput.addEventListener("blur", normalizeTrackDistanceInput);
+    ["puma-time", "tron-time", "forrest-time", "warr-time"].forEach((inputId) => {
+        const input = document.getElementById(inputId);
+        input.addEventListener("input", () => {
+            input.dataset.autoFilled = input.value.trim() ? "false" : "true";
+        });
+    });
     document.getElementById("run-race-button").addEventListener("click", calculateRace);
     updateHistory();
 });

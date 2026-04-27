@@ -16,7 +16,11 @@
         <section class="hero">
             <div class="hero-top">
                 <div class="hero-copy">
-                    <div class="eyebrow">Race distance: <span id="track-distance-badge">-</span></div>
+                    <div class="eyebrow">
+                        Race distance:
+                        <input type="number" id="track-distance-input" value="5" min="0.1" step="0.1" aria-label="Race distance in meters">
+                        <span class="distance-unit">m</span>
+                    </div>
                     <h1>Race Against<br>The Robots</h1>
                     <p class="subtitle">
                         Can you beat the full robot field and use less energy doing it? Time the human runner, PUMA, TRON, FORREST, and the WARR Crater Rover over a full <span id="track-distance-sentence">-</span> race.
@@ -246,7 +250,7 @@
                                 <div class="metric-label">Energy Used</div>
                                 <span class="big-time" id="human-joules">0 J</span>
                                 <div class="result-note" id="human-kcal">0.00 kcal</div>
-                                <div class="result-note" id="human-food">Consumed energy worth of 0 bananas.</div>
+                                <div class="result-note" id="human-food">Consumed energy worth of 0 bananas or 0 gummy bears.</div>
                             </div>
                         </article>
 
@@ -278,7 +282,7 @@
                                 <div class="metric-label">Energy Used</div>
                                 <span class="big-time" id="puma-joules">0 J</span>
                                 <div class="result-note" id="puma-kcal">0.00 kcal</div>
-                                <div class="result-note" id="puma-food">Equivalent to the energy in 0 bananas.</div>
+                                <div class="result-note" id="puma-food">Equivalent to the energy in 0 bananas or 0 gummy bears.</div>
                             </div>
                         </article>
 
@@ -311,7 +315,7 @@
                                 <div class="metric-label">Energy Used</div>
                                 <span class="big-time" id="tron-joules">0 J</span>
                                 <div class="result-note" id="tron-kcal">0.00 kcal</div>
-                                <div class="result-note" id="tron-food">Equivalent to the energy in 0 bananas.</div>
+                                <div class="result-note" id="tron-food">Equivalent to the energy in 0 bananas or 0 gummy bears.</div>
                             </div>
                         </article>
 
@@ -345,7 +349,7 @@
                                 <div class="metric-label">Energy Used</div>
                                 <span class="big-time" id="forrest-joules">0 J</span>
                                 <div class="result-note" id="forrest-kcal">0.00 kcal</div>
-                                <div class="result-note" id="forrest-food">Equivalent to the energy in 0 bananas.</div>
+                                <div class="result-note" id="forrest-food">Equivalent to the energy in 0 bananas or 0 gummy bears.</div>
                             </div>
                         </article>
 
@@ -377,7 +381,7 @@
                                 <div class="metric-label">Energy Used</div>
                                 <span class="big-time" id="warr-joules">0 J</span>
                                 <div class="result-note" id="warr-kcal">0.00 kcal</div>
-                                <div class="result-note" id="warr-food">Equivalent to the energy in 0 bananas.</div>
+                                <div class="result-note" id="warr-food">Equivalent to the energy in 0 bananas or 0 gummy bears.</div>
                             </div>
                         </article>
                     </section>
